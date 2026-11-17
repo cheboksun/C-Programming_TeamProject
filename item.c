@@ -77,7 +77,7 @@ int readInt(void) {
             break;              /* 숫자를 잘 읽었으면 반복 종료 */
         }
         if (result == EOF) {
-            exit(0);            /* 입력이 끝났으면(Ctrl+D 등) 프로그램 종료 */
+            exit(0);            /* 입력이 끝났으면(Windows: Ctrl+Z, macOS: Ctrl+D) 프로그램 종료 */
         }
 
         /* 숫자가 아니면: 그 줄에 남은 글자를 모두 버린다 */
@@ -149,10 +149,10 @@ void showInventory(const Player *player) {
 
         if (item->type == ITEM_WEAPON) {
             printf("%d. %s [무기] 공격력 +%d (강화 +%d)\n",
-                   i + 1, item->name, item->value, item->enhance);
+                   i + 1, item->name, getItemBonus(item), item->enhance);
         } else {
             printf("%d. %s [방어구] 방어력 +%d (강화 +%d)\n",
-                   i + 1, item->name, item->value, item->enhance);
+                   i + 1, item->name, getItemBonus(item), item->enhance);
         }
     }
 }
