@@ -72,6 +72,8 @@ void give_reward(Player* p, const Monster* m)
     p->exp += m->exp;
     p->gold += m->gold;
 
+    onMonsterKilled(p, m->name);  /* 몬스터 처치를 퀘스트에 알려 줌 (이게 있어야 처치 수가 올라감) */
+
     printf("\n========================================\n");
     printf("                승리!\n");
     printf("========================================\n");
