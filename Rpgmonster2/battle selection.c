@@ -46,13 +46,6 @@ void battle_menu(Player* p)
             continue;
         }
 
-        // 체력이 0이면 사냥 불가능
-        if (p->hp <= 0) {
-            printf("체력이 부족합니다.\n");
-            printf("여관에서 체력을 회복해주세요.\n");
-            return;
-        }
-
         printf("\n----------------------------------------\n");
         printf("1. 일반 몬스터 사냥\n");
         printf("2. 보스 몬스터 도전\n");
@@ -93,9 +86,6 @@ void battle_menu(Player* p)
         else if (result == RUN_AWAY) {
             printf("\n사냥터에서 빠져나왔습니다.\n");
         }
-        else {
-            printf("\n전투에서 패배했습니다.\n");
-            return;
-        }
+        // 패배(HP 0)는 fight() 안에서 게임 오버 처리 후 종료됨
     }
 }

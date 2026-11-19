@@ -1,7 +1,7 @@
 ﻿#ifndef COMBAT_H
 #define COMBAT_H
 
-#include "game.h"
+#include "character.h"
 #include "monster.h"
 
 // 전투 결과를 숫자로 구분

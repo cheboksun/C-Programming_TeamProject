@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include "combat.h"
+#include "content.h"
 
 // 공격 데미지를 계산하는 함수
 // 공격력에서 방어력을 빼고 최소 데미지는 1로 설정
@@ -22,9 +23,9 @@ void show_status(const Player* p, const Monster* m)
     printf("========================================\n");
 
     printf("캐릭터 : %s (레벨 %d)\n", p->name, p->level);
-    printf("체력 : %d / %d\n", p->hp, p->maxHp);
+    printf("체력 : %d / %d\n", p->hp, p->max_hp);
     printf("공격력 : %d | 방어력 : %d\n",
-        p->attack, p->defense);
+        p->atk, p->def);
 
     printf("----------------------------------------\n");
 
@@ -45,7 +46,7 @@ int use_potion(Player* p)
         return 0;
     }
 
-    if (p->hp >= p->maxHp) {
+    if (p->hp >= p->max_hp) {
         printf("체력이 이미 가득 찼습니다.\n");
         return 0;
     }
@@ -53,15 +54,15 @@ int use_potion(Player* p)
     // 포션 1개 소비
     p->potion--;
 
-    // 체력 40 회복
-    p->hp += 40;
+    // 체력 POTION_HEAL만큼 회복
+    p->hp += POTION_HEAL;
 
     // 최대 체력을 초과하지 않도록 제한
-    if (p->hp > p->maxHp)
-        p->hp = p->maxHp;
+    if (p->hp > p->max_hp)
+        p->hp = p->max_hp;
 
     printf("\n포션을 사용했습니다!\n");
-    printf("현재 체력 : %d / %d\n", p->hp, p->maxHp);
+    printf("현재 체력 : %d / %d\n", p->hp, p->max_hp);
 
     return 1;
 }
@@ -69,7 +70,6 @@ int use_potion(Player* p)
 // 몬스터 처치 시 경험치와 골드 지급
 void give_reward(Player* p, const Monster* m)
 {
-    p->exp += m->exp;
     p->gold += m->gold;
 
     onMonsterKilled(p, m->name);  /* 몬스터 처치를 퀘스트에 알려 줌 (이게 있어야 처치 수가 올라감) */
@@ -83,9 +83,11 @@ void give_reward(Player* p, const Monster* m)
     printf("획득 골드 : %d\n", m->gold);
 
     printf("----------------------------------------\n");
-    printf("현재 경험치 : %d\n", p->exp);
     printf("현재 골드 : %d\n", p->gold);
     printf("========================================\n");
+
+    // 승리 메시지 출력 후 경험치 지급 (레벨업 메시지가 승리 메시지 뒤에 나오도록)
+    add_exp(p, m->exp);
 }
 
 // 전투 행동 번호를 입력받는 함수
@@ -141,7 +143,7 @@ int fight(Player* p, Monster m)
         if (choice == 1) {
 
             damage = calculate_damage(
-                p->attack, m.defense
+                p->atk, m.defense
             );
 
             m.hp -= damage;
@@ -197,7 +199,7 @@ int fight(Player* p, Monster m)
 
         // 몬스터 반격
         damage = calculate_damage(
-            m.attack, p->defense
+            m.attack, p->def
         );
 
         p->hp -= damage;
@@ -209,15 +211,16 @@ int fight(Player* p, Monster m)
         printf("%d의 피해를 받았습니다.\n", damage);
 
         // 캐릭터 패배 판정
+        // HP가 0이 되면 골드와 상관없이 즉시 게임 오버 (1번·2번 합의)
         if (p->hp == 0) {
             printf("\n========================================\n");
-            printf("               전투 패배\n");
+            printf("               GAME OVER\n");
             printf("========================================\n");
             printf("%s이(가) 쓰러졌습니다.\n", p->name);
-            printf("여관에서 체력을 회복하세요.\n");
+            printf("최종 레벨 : %d | 보유 골드 : %d\n", p->level, p->gold);
             printf("========================================\n");
 
-            return LOSE;
+            exit(0);
         }
     }
 
