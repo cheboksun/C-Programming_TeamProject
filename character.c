@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "character.h"
-#include "item.h"
 
 void clear_input_buffer(void)
 {
