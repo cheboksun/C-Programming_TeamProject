@@ -1,14 +1,18 @@
 ﻿/*
- * game.h
- * 여러 .c 파일이 함께 쓰는 "공용 설명서" 파일입니다.
+ * item.h
+ * 3번 담당(아이템·콘텐츠)의 "타입 설명서" 파일입니다.
  * - 상수(#define): 게임에서 쓰는 고정된 숫자
- * - 구조체(struct): 여러 값을 하나로 묶은 자료형
- * - 함수 선언: "이런 함수가 어딘가에 있다"라고 알려 주는 부분
+ * - 구조체(struct): Item, Inventory, Equipment, Quest
+ *
+ * ※ Player 구조체는 여기 없습니다. 1번의 character.h에 있는 Player가 팀 표준입니다.
+ *    character.h가 이 파일을 include해서 Player 안에 Inventory, Equipment, Quest를 넣습니다.
+ *    (그래서 이 파일은 Player를 쓰면 안 됩니다. 쓰면 헤더끼리 서로를 include하는 순환이 생깁니다.)
+ * ※ 3번 함수 선언은 content.h에 있습니다.
  */
 
 /* 같은 헤더가 두 번 포함되어도 문제가 없도록 막아 주는 장치 */
-#ifndef GAME_H
-#define GAME_H
+#ifndef ITEM_H
+#define ITEM_H
 
 /* ===== 상수 ===== */
 #define MAX_INVENTORY 20     /* 인벤토리 최대 칸 수 (장비만 들어감) */
@@ -63,55 +67,5 @@ typedef struct {
     int rewardExp;    /* 보상 경험치 */
     int state;        /* QUEST_NOT_ACCEPTED ~ QUEST_REWARDED */
 } Quest;
-
-/* 플레이어
- * 앞의 9개(name ~ potion)는 2번 전투 코드의 Player와 순서까지 똑같다.
- * (그래서 2번 main.c의 {"용사", 1, 100, ...} 초기화가 그대로 동작함)
- * 뒤의 3개(inventory, equipment, quests)는 3번이 추가한 것이다. */
-typedef struct {
-    char name[30];    /* 캐릭터 이름 */
-    int level;        /* 레벨 */
-    int hp;           /* 현재 체력 */
-    int maxHp;        /* 최대 체력 */
-    int attack;       /* 공격력 (장비와 강화 보너스까지 포함된 값) */
-    int defense;      /* 방어력 (장비와 강화 보너스까지 포함된 값) */
-    int exp;          /* 경험치 */
-    int gold;         /* 골드 */
-    int potion;       /* 포션 개수 */
-    Inventory inventory;
-    Equipment equipment;
-    Quest quests[MAX_QUEST];
-} Player;
-
-/* ===== 함수 선언 ===== */
-
-/* 공용 입력 (item.c) */
-int readInt(void);
-
-/* 인벤토리 (item.c) */
-int addItem(Inventory *inventory, Item item);
-void removeItem(Inventory *inventory, int index);
-void showInventory(const Player *player);
-int usePotion(Player *player);
-void inventoryMenu(Player *player);
-
-/* 상점 (item.c) */
-void shopMenu(Player *player);
-
-/* 장비 (item.c) */
-int equipItem(Player *player, int index);
-void showEquipment(const Player *player);
-void equipmentMenu(Player *player);
-
-/* 강화 (item.c) */
-void enhanceMenu(Player *player);
-
-/* 퀘스트 (quest.c) */
-void initQuests(Player *player);
-void onMonsterKilled(Player *player, const char *monsterName);
-void questMenu(Player *player);
-
-/* 1번 담당이 구현하는 함수 (경험치 획득 + 레벨업) */
-void gainExp(Player *player, int amount);
 
 #endif

@@ -1,15 +1,15 @@
-/*
+﻿/*
  * item.c
  * 3번 담당: 입력, 인벤토리, 상점, 장비, 강화
  *
  * 2번 전투 코드와 맞추기 위한 규칙
  * - 포션은 인벤토리 칸이 아니라 player->potion(개수)에 저장한다.
- * - 장비를 장착하거나 강화하면 player->attack, player->defense를 바로 바꾼다.
- *   (그래서 전투 코드가 p->attack을 그대로 써도 장비가 반영된다)
+ * - 장비를 장착하거나 강화하면 player->atk, player->def를 바로 바꾼다.
+ *   (그래서 전투 코드가 p->atk을 그대로 써도 장비가 반영된다)
  */
 #include <stdio.h>   /* printf, scanf, getchar */
 #include <stdlib.h>  /* exit, rand */
-#include "game.h"
+#include "content.h"
 
 /* ================================================================
  * 0. 게임 데이터
@@ -170,7 +170,7 @@ int usePotion(Player *player) {
     }
 
     /* 2) HP가 이미 가득 찼으면 포션을 아낀다 */
-    if (player->hp >= player->maxHp) {
+    if (player->hp >= player->max_hp) {
         printf("HP가 이미 가득 찼습니다.\n");
         return 0;
     }
@@ -181,8 +181,8 @@ int usePotion(Player *player) {
     player->hp = player->hp + POTION_HEAL;
 
     /* 4) 최대 HP를 넘으면 최대 HP로 맞춘다 */
-    if (player->hp > player->maxHp) {
-        player->hp = player->maxHp;
+    if (player->hp > player->max_hp) {
+        player->hp = player->max_hp;
     }
 
     printf("HP가 %d 회복되었습니다. (%d -> %d, 남은 포션 %d개)\n",
@@ -197,7 +197,7 @@ void inventoryMenu(Player *player) {
 
     while (1) {
         showInventory(player);
-        printf("\nHP %d/%d\n", player->hp, player->maxHp);
+        printf("\nHP %d/%d\n", player->hp, player->max_hp);
         printf("1. 포션 사용  2. 장비 버리기  0. 뒤로\n선택: ");
         choice = readInt();
 
@@ -386,28 +386,28 @@ int equipItem(Player *player, int index) {
         /* 4) 이미 무기가 있으면: 기존 무기 능력치를 빼고 인벤토리로 돌려보낸다
          *    (방금 한 칸을 비웠으므로 항상 들어간다) */
         if (player->equipment.hasWeapon == 1) {
-            player->attack = player->attack - getItemBonus(&player->equipment.weapon);
+            player->atk = player->atk - getItemBonus(&player->equipment.weapon);
             addItem(&player->inventory, player->equipment.weapon);
             printf("%s을(를) 해제했습니다.\n", player->equipment.weapon.name);
         }
         /* 5) 새 무기를 장착하고 능력치를 더한다 */
         player->equipment.weapon = newItem;
         player->equipment.hasWeapon = 1;
-        player->attack = player->attack + getItemBonus(&newItem);
+        player->atk = player->atk + getItemBonus(&newItem);
     } else {
         /* 방어구도 같은 방식 */
         if (player->equipment.hasArmor == 1) {
-            player->defense = player->defense - getItemBonus(&player->equipment.armor);
+            player->def = player->def - getItemBonus(&player->equipment.armor);
             addItem(&player->inventory, player->equipment.armor);
             printf("%s을(를) 해제했습니다.\n", player->equipment.armor.name);
         }
         player->equipment.armor = newItem;
         player->equipment.hasArmor = 1;
-        player->defense = player->defense + getItemBonus(&newItem);
+        player->def = player->def + getItemBonus(&newItem);
     }
 
     printf("%s을(를) 장착했습니다. (공격력 %d / 방어력 %d)\n",
-           newItem.name, player->attack, player->defense);
+           newItem.name, player->atk, player->def);
     return 1;
 }
 
@@ -433,7 +433,7 @@ void showEquipment(const Player *player) {
         printf("방어구: 없음\n");
     }
 
-    printf("전체 공격력: %d / 전체 방어력: %d\n", player->attack, player->defense);
+    printf("전체 공격력: %d / 전체 방어력: %d\n", player->atk, player->def);
 }
 
 /* 장비 관리 메뉴: 1 장착, 2 현재 장비 확인, 0 뒤로 */
@@ -490,7 +490,7 @@ static void showEnhanceInfo(void) {
 /* 장착 중인 장비 1개를 강화한다.
  * target  : 강화할 장비의 "주소" (복사본이 아니라 진짜 장비를 바꾸기 위해)
  * equipped: 그 부위를 장착하고 있는지 (1/0)
- * stat    : 강화 성공 시 올려 줄 능력치의 "주소" (&player->attack 또는 &player->defense)
+ * stat    : 강화 성공 시 올려 줄 능력치의 "주소" (&player->atk 또는 &player->def)
  * bonus   : 1단계마다 올라가는 양 (무기 3, 방어구 2) */
 static void enhanceItem(Player *player, Item *target, int equipped, int *stat, int bonus) {
     int cost;
@@ -522,7 +522,7 @@ static void enhanceItem(Player *player, Item *target, int equipped, int *stat, i
         target->enhance++;
         *stat = *stat + bonus;  /* 플레이어 공격력(또는 방어력)도 바로 올린다 */
         printf("강화 성공! %s +%d (공격력 %d / 방어력 %d, 남은 골드 %dG)\n",
-               target->name, target->enhance, player->attack, player->defense, player->gold);
+               target->name, target->enhance, player->atk, player->def, player->gold);
     } else {
         printf("강화 실패... 단계는 +%d 그대로입니다. (남은 골드 %dG)\n",
                target->enhance, player->gold);
@@ -541,13 +541,13 @@ void enhanceMenu(Player *player) {
         switch (choice) {
         case 1:
             /* &player->equipment.weapon : 실제 무기의 주소
-             * &player->attack           : 실제 공격력의 주소 */
+             * &player->atk           : 실제 공격력의 주소 */
             enhanceItem(player, &player->equipment.weapon, player->equipment.hasWeapon,
-                        &player->attack, WEAPON_ENHANCE_BONUS);
+                        &player->atk, WEAPON_ENHANCE_BONUS);
             break;
         case 2:
             enhanceItem(player, &player->equipment.armor, player->equipment.hasArmor,
-                        &player->defense, ARMOR_ENHANCE_BONUS);
+                        &player->def, ARMOR_ENHANCE_BONUS);
             break;
         case 3:
             showEnhanceInfo();

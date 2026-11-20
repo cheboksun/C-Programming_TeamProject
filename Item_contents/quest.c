@@ -4,7 +4,7 @@
  */
 #include <stdio.h>
 #include <string.h>  /* strcmp: 문자열 비교 */
-#include "game.h"
+#include "content.h"
 
 /* 처음 시작할 때의 퀘스트 목록
  * {이름, 처치할 몬스터, 목표 수, 현재 수, 보상 골드, 보상 경험치, 상태}
@@ -159,8 +159,8 @@ static void claimReward(Player *player) {
     player->gold = player->gold + quest->rewardGold;
     printf("보상: %dG, 경험치 %d 획득!\n", quest->rewardGold, quest->rewardExp);
 
-    /* 3) 경험치 지급 (레벨업은 1번 담당의 gainExp가 처리) */
-    gainExp(player, quest->rewardExp);
+    /* 3) 경험치 지급 (레벨업은 1번 담당의 add_exp가 처리) */
+    add_exp(player, quest->rewardExp);
 
     /* 4) 다시 받지 못하도록 상태 변경 */
     quest->state = QUEST_REWARDED;
