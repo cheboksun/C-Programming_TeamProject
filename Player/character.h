@@ -1,5 +1,6 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
+#include "item.h"
 
 #define NAME_LEN 32
 #define INN_COST 30   /* 여관 이용 요금 */
