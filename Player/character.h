@@ -24,6 +24,9 @@ typedef struct {
     int  def;           /* 방어력 */
     int  gold;          /* 3번 파트(상점)에서 사용 */
     int  potion;        /* 2번/3번 파트(포션)에서 사용 */
+    Inventory inventory;
+    Equipment equipment;
+    Quest quests[MAX_QUEST];
 } Player;
 
 /* 입력 버퍼 비우기 */
